@@ -1,0 +1,37 @@
+/* ADC 采集测试相关定义 */
+#define ADC_DATA_SIZE 40000      // 修改为4万个数据(耗费80KB RAM，正好可以覆盖近6秒的数据)
+#define ADC_DECIMATION_FACTOR 10 // 采集降采样系数：每 10 次存入一个（约 147us 存一个）
+
+uint16_t g_ADC_Raw_Data[ADC_DATA_SIZE];
+uint8_  t g_ADC_Record_Channel; // 0=Vin, 1=Vout, 2=Iin, 3=Iout
+uint16_t g_ADC_Index;
+uint8_  t g_ADC_Enable;
+uint8_  t g_ADC_Decimation_Count;
+
+// 记录 ADC 原始数据到数组（一次仅记录一个通道的未滤波、未标定数据），带降采样
+#define RECORD_ADC_TO_ARRAY(raw_val)                             \
+    do                                                           \
+    {                                                            \
+        if (g_ADC_Enable == 0)                                   \
+        {                                                        \
+            g_ADC_Index = 0;                                     \
+            g_ADC_Decimation_Count = 0;                          \
+        }                                                        \
+        else if (g_ADC_Enable == 1)                              \
+        {                                                        \
+            g_ADC_Decimation_Count++;                            \
+            if (g_ADC_Decimation_Count >= ADC_DECIMATION_FACTOR) \
+            {                                                    \
+                g_ADC_Decimation_Count = 0;                      \
+                if (g_ADC_Index < ADC_DATA_SIZE)                 \
+                {                                                \
+                    g_ADC_Raw_Data[g_ADC_Index] = (raw_val);     \
+                    g_ADC_Index++;                               \
+                }                                                \
+                if (g_ADC_Index >= ADC_DATA_SIZE)                \
+                {                                                \
+                    g_ADC_Enable = 2;                            \
+                }                                                \
+            }                                                    \
+        }                                                        \
+    } while (0)

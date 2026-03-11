@@ -1,11 +1,16 @@
 import sys
 from PySide6.QtWidgets import QApplication
+import matplotlib
 
 # 为了保证在打包或特定目录下能正确引用内部包，我们将当前路径加入 sys.path
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from gui.main_window import MainWindow
+
+# Matplotlib 中文显示与负号兼容设置，减少坐标与标题乱码
+matplotlib.rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'Arial Unicode MS']
+matplotlib.rcParams['axes.unicode_minus'] = False
 
 def main():
     app = QApplication(sys.argv)
